@@ -62,7 +62,7 @@ You can also view an example map [here](example_map.html).
 
 1. **Clone the repository**:
    ```bash
-   git clone [your-repo-link]
+   git clone https://github.com/whoalacoasta/onemap
    ```
 
 2. **Set up a virtual environment**:
