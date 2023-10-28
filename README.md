@@ -96,7 +96,7 @@ You can also view an example map [here](example_map.html).
 
 2. **Update `config.py` with the necessary headers and cookies**:
 
-   These can be obtained by inspecting the network requests used in this project:
+   These can be obtained by inspecting the network requests made while browsing public rides.
 
    - Open the [OneWheel browser app](https://app.onewheel.com/rides.html).
    - Right-click and select 'Inspect' or press `Ctrl+Shift+I` (or `Cmd+Option+I` on Mac).

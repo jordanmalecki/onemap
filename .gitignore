@@ -80,4 +80,3 @@ venv.bak/
 # Custom
 data/
 config.py
-gpt.py
