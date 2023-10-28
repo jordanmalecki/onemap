@@ -98,10 +98,10 @@ You can also view an example map [here](example_map.html).
 
    These can be obtained by inspecting the network requests used in this project:
 
-   - Open the OneWheel website.
+   - Open the [OneWheel browser app](https://app.onewheel.com/rides.html).
    - Right-click and select 'Inspect' or press `Ctrl+Shift+I` (or `Cmd+Option+I` on Mac).
    - Navigate to the 'Network' tab.
-   - Interact with the website or perform actions that trigger the relevant requests (e.g., viewing ride details).
+   - Refresh the page or interact with the website or perform actions that trigger the relevant requests (e.g., viewing ride details).
    - Filter the requests to locate the specific endpoints used in this project, such as `https://app.onewheel.com/wp-json/fm/v2/trails` and related endpoints (I.E. filtering by "v2" would work).
    - Once you identify a relevant request, click on it and copy the 'Request Headers' and 'Cookies' to use in the `config.py` file.
 
