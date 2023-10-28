@@ -80,7 +80,7 @@ venv.bak/
 .ropeproject
 
 # Custom
-/data/*
+data/*
 !data/.gitkeep
 config.py
 rides_map_dark.html

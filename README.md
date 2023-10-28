@@ -67,7 +67,7 @@ You can also view an example map [here](example_map.html).
 
 2. **Set up a virtual environment**:
    
-   Navigate to the main directory and create a virtual environment:
+   Navigate to the project directory and create a virtual environment:
    ```bash
    python -m venv .venv
    ```
@@ -107,7 +107,7 @@ You can also view an example map [here](example_map.html).
 
 ## Usage
 
-Navigate to the main directory and execute:
+Navigate to the project directory (ensure your virtual environment is activated) and execute:
 ```bash
 python run.py
 ```
