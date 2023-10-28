@@ -58,6 +58,8 @@ coverage.xml
 # Environments
 .env
 .venv
+.env/
+.venv/
 env/
 venv/
 ENV/
@@ -78,5 +80,7 @@ venv.bak/
 .ropeproject
 
 # Custom
-data/
+/data/*
+!data/.gitkeep
 config.py
+rides_map_dark.html
