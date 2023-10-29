@@ -85,3 +85,4 @@ data/*
 !data/.gitkeep
 config.py
 rides_map_dark.html
+dashboard.png

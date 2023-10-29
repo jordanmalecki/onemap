@@ -111,6 +111,29 @@ Navigate to the project directory (ensure your virtual environment is activated)
 ```bash
 python run.py
 ```
+## Dashboard:
+
+**Disclaimer:** *The api does specify the units for some fields. As such, units and subsequent unit conversions used in the dashboard are probably not accurate - contributions are welcome.*
+
+After you've aggregated your rides using the main script (and it created a `data/user_rides.json`), you can visualize some of your ride stats using the `plot_stats.py` script.
+
+#### Steps to Generate the Dashboard:
+
+1. Ensure you've already executed `run.py` and have `user_rides.json` generated.
+2. Navigate to the project directory (ensure your virtual environment is activated) and execute:
+   ```bash
+   python viz/plot_stats.py
+   ```
+3. This will do two things:
+
+   (a) Generate a `dashboard.png` file.
+
+   (b) Open an interactive window containing the dashboard (If a GUI is available).
+
+Example dashboard:
+
+![Example Dashboard](example_dashboard.png)
+
 
 ## Contributing
 
