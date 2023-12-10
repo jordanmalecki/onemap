@@ -49,9 +49,7 @@ After aggregating ride data, the `folium` library is utilized to plot the rides 
 
 To view and explore the aggregated map:
 1. Navigate to the local path where `rides_map_dark.html` is saved.
-2. Open `rides_map_dark.html` in your preferred web browser. 
-
-You can also view an example map [here](example_map.html).
+2. Open `rides_map_dark.html` in your preferred web browser.
 
 ## Prerequisites
 
