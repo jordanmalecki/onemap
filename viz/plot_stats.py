@@ -34,6 +34,10 @@ df['distance'] = df['distance'] * km_to_miles_conversion
 conversion_factor = 30.91
 df['topSpeedOw'] = df['topSpeedOw'] / conversion_factor
 
+# Convert averageSpeed values to mph
+km_to_miles_conversion = 0.621371
+df['averageSpeed'] = df['averageSpeed'] * km_to_miles_conversion
+
 # Adjust altitude values based on the provided information
 min_alt = df['altLow'].min()
 df['altAdjusted'] = df['altLow'].apply(lambda x: (x - min_alt) + 460)
