@@ -29,12 +29,11 @@ df["ridingTime"] = df["ridingTime"].apply(lambda x: f"{x // 3600}h {(x % 3600) /
 # Assuming the distances are in kilometers, convert to miles
 km_to_miles_conversion = 0.621371
 df["distance"] = df["distance"] * km_to_miles_conversion
+df["averageSpeed"] = df["averageSpeed"] * km_to_miles_conversion
 
 # Convert topSpeedOw values to mph using the conversion factor
 conversion_factor = 30.91
 df["topSpeedOw"] = df["topSpeedOw"] / conversion_factor
-# Convert averageSpeed values to mph using the conversion factor
-df["averageSpeed"] = df["averageSpeed"] / conversion_factor
 
 # Adjust altitude values based on the provided information
 min_alt = df["altLow"].min()
