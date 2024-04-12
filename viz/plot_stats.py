@@ -110,15 +110,15 @@ df_sorted_by_date["duration_between_rides"] = df_sorted_by_date[
     60 * 60 * 24
 )  # Convert to days
 
-# Riding Streaks
-streaks = (
-    df_sorted_by_date["duration_between_rides"]
-    .fillna(1)
-    .eq(1)
-    .astype(int)
-    .groupby(df_sorted_by_date["duration_between_rides"].ne(1).cumsum())
-    .cumsum()
-)
+# Correct the logic to compute riding streaks
+df_sorted_by_date["day"] = df_sorted_by_date["timestamp"].dt.floor(
+    "d"
+)  # Get only the date part
+unique_days = df_sorted_by_date["day"].drop_duplicates()  # Unique days with rides
+
+# Check for consecutive days
+streaks = (unique_days.diff() == pd.Timedelta(days=1)).astype(int)
+streaks = streaks.groupby((streaks == 0).cumsum()).cumsum()
 
 longest_streak = streaks.max()
 print(f"Longest Streak of Consecutive Days Riding: {longest_streak} days")
@@ -139,7 +139,7 @@ fig, axes = plt.subplots(
 )
 
 # Plot 1: Daily Frequency
-axes[0, 0].plot(rides_per_day_reindexed)
+axes[0, 0].scatter(rides_per_day_reindexed.index, rides_per_day_reindexed.values)
 axes[0, 0].set_title("Number of Rides per Day")
 axes[0, 0].set_xlabel("Date")
 axes[0, 0].set_ylabel("Number of Rides")
@@ -233,10 +233,12 @@ axes[3, 0].set_ylabel("Frequency")
 axes[3, 0].grid(True, alpha=0.2)
 
 # Plot 11: Ride Distance Over Time
-axes[3, 1].scatter(df_sorted_by_date['timestamp'], df_sorted_by_date['distance'], color=colors[8])
-axes[3, 1].set_title('Ride Distance Over Time')
-axes[3, 1].set_xlabel('Date')
-axes[3, 1].set_ylabel('Distance (miles)')
+axes[3, 1].scatter(
+    df_sorted_by_date["timestamp"], df_sorted_by_date["distance"], color=colors[8]
+)
+axes[3, 1].set_title("Ride Distance Over Time")
+axes[3, 1].set_xlabel("Date")
+axes[3, 1].set_ylabel("Distance (miles)")
 axes[3, 1].grid(True, alpha=0.2)
 
 # Plot 12: Heatmap of Average Speed by Day of Week and Hour

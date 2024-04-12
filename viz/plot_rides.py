@@ -19,7 +19,7 @@ def plot_rides(input_path, output_path):
         ride_coords = [(float(point['lat']), float(point['lon'])) for point in ride]
     
         # Add a polyline for the ride
-        folium.PolyLine(ride_coords, color='#B388FF', weight=3.5, opacity=0.33).add_to(m)
+        folium.PolyLine(ride_coords, color='#B388FF', weight=3.5, opacity=0.16).add_to(m)
 
     # Save map to HTML
     m.save(output_path)
