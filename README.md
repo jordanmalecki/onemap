@@ -2,6 +2,8 @@
 
 This project is designed to aggregate and visualize a user's OneWheel app rides based on a user-specified location.
 
+***NOTE***: *Recorded ride must be set to "public" within the OneWheel app in order to be captured and included in the aggregation.*
+
 ## How?
 
 ### 1. **Fetching General Ride Data**:
