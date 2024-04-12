@@ -6,7 +6,8 @@ This project is designed to aggregate and visualize a user's OneWheel app rides 
 
 ### 1. **Fetching General Ride Data**:
 
-The program starts by retrieving general ride details from the endpoint: 
+The program starts by retrieving general ride details from the endpoint:
+
 ```
 https://app.onewheel.com/wp-json/fm/v2/trails
 ```
@@ -14,10 +15,10 @@ https://app.onewheel.com/wp-json/fm/v2/trails
 ### 2. **User Input**:
 
 The user is prompted to provide:
+
 - A location (e.g., 'Buffalo, NY')
 - Maximum search distance in miles
 - OneWheel app nickname (as displayed on leaderboards)
-
 
 ![Example Inputs](example_inputs.png)
 
@@ -30,24 +31,33 @@ With the user input, the program filters rides based on the provided location us
 Before diving into the augmentation process, it's important to note that the trail and localized filter data fetched initially will include **ALL** rides in the specified area. The program then individually checks each ride to determine if the user matches the provided input. Due to this, if a large area is specified, the process can be time-consuming.
 
 For each filtered ride:
-- Details are fetched from: 
+
+- Details are fetched from:
+
 ```
 https://app.onewheel.com/wp-json/fm/v2/trails/1?trackId={ride_id}
 ```
+
 - If the ride matches the user's nickname, further detailed coordinates for the ride are fetched from:
+
 ```
 https://app.onewheel.com/wp-json/fm/v2/trailscoordinates/{ride_id}
 ```
-This data is saved locally for further processing.
 
+This data is saved locally for further processing.
 
 ### 5. **Visualization**:
 
 After aggregating ride data, the `folium` library is utilized to plot the rides on a dark-themed map. Each ride is represented as a path.
 
-![Example Map](example_map.png)
+#### Example Map
+<img src="example_map.png" alt="drawing" width="500"/>
+
+#### Example Zoomed Map
+<img src="example_zoomed.png" alt="drawing" width="500"/>
 
 To view and explore the aggregated map:
+
 1. Navigate to the local path where `rides_map_dark.html` is saved.
 2. Open `rides_map_dark.html` in your preferred web browser.
 
@@ -59,18 +69,20 @@ To view and explore the aggregated map:
 ## Setup
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/whoalacoasta/onemap
    ```
-
 2. **Set up a virtual environment**:
-   
+
    Navigate to the project directory and create a virtual environment:
+
    ```bash
    python -m venv .venv
    ```
 
    Activate the virtual environment:
+
    - On Windows:
      ```bash
      .\.venv\Scripts\activate
@@ -79,8 +91,8 @@ To view and explore the aggregated map:
      ```bash
      source .venv/bin/activate
      ```
-
 3. **Install required packages**:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -88,10 +100,10 @@ To view and explore the aggregated map:
 ## Configuration:
 
 1. **Rename `config_example.py` to `config.py`**:
+
    ```bash
    mv config_example.py config.py
    ```
-
 2. **Update `config.py` with the necessary headers and cookies**:
 
    These can be obtained by inspecting the network requests made while browsing public rides.
@@ -106,9 +118,11 @@ To view and explore the aggregated map:
 ## Usage
 
 Navigate to the project directory (ensure your virtual environment is activated) and execute:
+
 ```bash
 python run.py
 ```
+
 ## Dashboard:
 
 **Disclaimer:** *The api does specify the units for some fields. As such, units and subsequent unit conversions used in the dashboard are probably not accurate - contributions are welcome.*
@@ -119,6 +133,7 @@ After you've aggregated your rides using the main script (and it created a `data
 
 1. Ensure you've already executed `run.py` and have `user_rides.json` generated.
 2. Navigate to the project directory (ensure your virtual environment is activated) and execute:
+
    ```bash
    python viz/plot_stats.py
    ```
@@ -131,7 +146,6 @@ After you've aggregated your rides using the main script (and it created a `data
 Example dashboard:
 
 ![Example Dashboard](example_dashboard.png)
-
 
 ## Contributing
 
