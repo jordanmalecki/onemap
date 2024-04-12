@@ -138,85 +138,85 @@ fig, axes = plt.subplots(
     4, 3, figsize=(3674 / dpi_value, 2036 / dpi_value), dpi=dpi_value
 )
 
-# Plot 1: Daily Frequency
-axes[0, 0].scatter(rides_per_day_reindexed.index, rides_per_day_reindexed.values)
-axes[0, 0].set_title("Number of Rides per Day")
-axes[0, 0].set_xlabel("Date")
-axes[0, 0].set_ylabel("Number of Rides")
-axes[0, 0].grid(True)
+# Plot 11: Daily Frequency
+axes[3, 1].scatter(rides_per_day_reindexed.index, rides_per_day_reindexed.values)
+axes[3, 1].set_title("Number of Rides per Day")
+axes[3, 1].set_xlabel("Date")
+axes[3, 1].set_ylabel("Number of Rides")
+axes[3, 1].grid(True)
 
-# Plot 2: Distribution of Top Speeds
-axes[0, 1].hist(
+# Plot 4: Distribution of Top Speeds
+axes[1, 0].hist(
     df["topSpeedOw"], bins=30, color=colors[1], edgecolor=colors[0], alpha=0.7
 )
-axes[0, 1].set_title("Distribution of Top Speeds")
-axes[0, 1].set_xlabel("Speed (mph)")
-axes[0, 1].set_ylabel("Frequency")
-axes[0, 1].grid(True, alpha=0.2)
+axes[1, 0].set_title("Distribution of Top Speeds")
+axes[1, 0].set_xlabel("Speed (mph)")
+axes[1, 0].set_ylabel("Frequency")
+axes[1, 0].grid(True, alpha=0.2)
 
-# Plot 3: Heatmap of Rides by Day of Week and Hour
+# Plot 12: Heatmap of Rides by Day of Week and Hour
 sns.heatmap(
-    heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt=".0f", ax=axes[0, 2]
+    heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt=".0f", ax=axes[3, 2]
 )
-axes[0, 2].set_title("Ride Frequency by Day of Week and Hour")
+axes[3, 2].set_title("Ride Frequency by Day of Week and Hour")
 
-# Plot 4: Distribution of Average Speeds
+# Plot 7: Distribution of Average Speeds
 sns.histplot(
     df["averageSpeed"],
     bins=30,
     kde=True,
     color=colors[2],
     edgecolor=colors[0],
-    ax=axes[1, 0],
+    ax=axes[2, 0],
 )
 
-axes[1, 0].set_title("Distribution of Average Speeds")
-axes[1, 0].set_xlabel("Average Speed (mph)")
-axes[1, 0].set_ylabel("Frequency")
-axes[1, 0].grid(True, alpha=0.2)
+axes[2, 0].set_title("Distribution of Average Speeds")
+axes[2, 0].set_xlabel("Average Speed (mph)")
+axes[2, 0].set_ylabel("Frequency")
+axes[2, 0].grid(True, alpha=0.2)
 
-# Plot 5: Cumulative Distance Over Time
-axes[1, 1].plot(
+# Plot 3: Cumulative Distance Over Time
+axes[0, 2].plot(
     df_sorted_by_date["timestamp"],
     df_sorted_by_date["cumulative_distance"],
     color=colors[2],
 )
-axes[1, 1].set_title("Cumulative Distance Over Time")
-axes[1, 1].set_xlabel("Date")
-axes[1, 1].set_ylabel("Cumulative Distance (miles)")
-axes[1, 1].grid(True, alpha=0.2)
+axes[0, 2].set_title("Cumulative Distance Over Time")
+axes[0, 2].set_xlabel("Date")
+axes[0, 2].set_ylabel("Cumulative Distance (miles)")
+axes[0, 2].grid(True, alpha=0.2)
 
 # Plot 6: Average Speed Over Time with Gaps
-axes[1, 2].scatter(
+axes[2, 1].scatter(
     df_sorted_by_date["timestamp"], df_sorted_by_date["averageSpeed"], color=colors[3]
 )
-axes[1, 2].set_title("Average Speed Over Time")
-axes[1, 2].set_xlabel("Date")
-axes[1, 2].set_ylabel("Average Speed (mph)")
-axes[1, 2].grid(True, alpha=0.2)
-
-# Plot 7: Distribution of Ride Distances
-sns.histplot(
-    df["distance"], bins=30, kde=True, color=colors[4], edgecolor="white", ax=axes[2, 0]
-)
-axes[2, 0].set_title("Distribution of Ride Distances")
-axes[2, 0].set_xlabel("Distance (miles)")
-axes[2, 0].set_ylabel("Frequency")
-axes[2, 0].grid(True, alpha=0.2)
-
-# Plot 8: Max Speed vs. Average Speed
-axes[2, 1].scatter(df["averageSpeed"], df["topSpeedOw"], color=colors[5], alpha=0.7)
-axes[2, 1].set_title("Max Speed vs. Average Speed")
-axes[2, 1].set_xlabel("Average Speed (mph)")
-axes[2, 1].set_ylabel("Max Speed (mph)")
+axes[2, 1].set_title("Average Speed Over Time")
+axes[2, 1].set_xlabel("Date")
+axes[2, 1].set_ylabel("Average Speed (mph)")
 axes[2, 1].grid(True, alpha=0.2)
 
-# Plot 9: Number of Rides by Hour of the Day
-axes[2, 2].bar(hourly_rides.index, hourly_rides.values, color=colors[6])
-axes[2, 2].set_title("Number of Rides by Hour of the Day")
-axes[2, 2].set_xlabel("Hour of the Day")
-axes[2, 2].set_ylabel("Number of Rides")
-axes[2, 2].grid(True, alpha=0.2)
+# Plot 1: Distribution of Ride Distances
+sns.histplot(
+    df["distance"], bins=30, kde=True, color=colors[4], edgecolor="white", ax=axes[0, 0]
+)
+axes[0, 0].set_title("Distribution of Ride Distances")
+axes[0, 0].set_xlabel("Distance (miles)")
+axes[0, 0].set_ylabel("Frequency")
+axes[0, 0].grid(True, alpha=0.2)
+
+# Plot 5: Max Speed vs. Average Speed
+axes[1, 1].scatter(df["averageSpeed"], df["topSpeedOw"], color=colors[5], alpha=0.7)
+axes[1, 1].set_title("Max Speed vs. Average Speed")
+axes[1, 1].set_xlabel("Average Speed (mph)")
+axes[1, 1].set_ylabel("Max Speed (mph)")
+axes[1, 1].grid(True, alpha=0.2)
+
+# Plot 8: Number of Rides by Hour of the Day
+axes[1, 2].bar(hourly_rides.index, hourly_rides.values, color=colors[6])
+axes[1, 2].set_title("Number of Rides by Hour of the Day")
+axes[1, 2].set_xlabel("Hour of the Day")
+axes[1, 2].set_ylabel("Number of Rides")
+axes[1, 2].grid(True, alpha=0.2)
 
 # Plot 10: Distribution of Duration Between Rides
 sns.histplot(
@@ -232,20 +232,20 @@ axes[3, 0].set_xlabel("Duration (days)")
 axes[3, 0].set_ylabel("Frequency")
 axes[3, 0].grid(True, alpha=0.2)
 
-# Plot 11: Ride Distance Over Time
-axes[3, 1].scatter(
+# Plot 2: Ride Distance Over Time
+axes[0, 1].scatter(
     df_sorted_by_date["timestamp"], df_sorted_by_date["distance"], color=colors[8]
 )
-axes[3, 1].set_title("Ride Distance Over Time")
-axes[3, 1].set_xlabel("Date")
-axes[3, 1].set_ylabel("Distance (miles)")
-axes[3, 1].grid(True, alpha=0.2)
+axes[0, 1].set_title("Ride Distance Over Time")
+axes[0, 1].set_xlabel("Date")
+axes[0, 1].set_ylabel("Distance (miles)")
+axes[0, 1].grid(True, alpha=0.2)
 
-# Plot 12: Heatmap of Average Speed by Day of Week and Hour
+# Plot 9: Heatmap of Average Speed by Day of Week and Hour
 sns.heatmap(
-    speed_heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt="d", ax=axes[3, 2]
+    speed_heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt="d", ax=axes[2, 2]
 )
-axes[3, 2].set_title("Average Speed by Day of Week and Hour")
+axes[2, 2].set_title("Average Speed by Day of Week and Hour")
 
 # Grid, Title, XLabel, YLabel Adjustments
 for i in range(4):
