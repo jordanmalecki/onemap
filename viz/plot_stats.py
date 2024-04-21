@@ -59,19 +59,16 @@ all_dates = pd.date_range(
 # Reindex the rides_per_day series to include all dates and fill missing values with 0
 rides_per_day_reindexed = rides_per_day.reindex(all_dates, fill_value=0)
 
-# Heatmap of Rides by Day of Week and Hour
+# Extract day of week and hour for heatmaps
 df["day_of_week"] = df["timestamp"].dt.day_name()
 df["hour"] = df["timestamp"].dt.hour
 
+# Heatmap of Rides by Day of Week and Hour
 heatmap_data = df.groupby(["day_of_week", "hour"]).size().unstack().fillna(0)
 ordered_days = [
     "Monday",
     "Tuesday",
     "Wednesday",
-    # In the provided code snippet, the line `    "Tuesday",` is part of a list called `ordered_days`.
-    # This list is used to specify the order of days of the week for the heatmap visualization. By
-    # defining the order of days in this list, you can control how the days are displayed on the
-    # heatmap along the y-axis.
     "Thursday",
     "Friday",
     "Saturday",
@@ -90,18 +87,41 @@ shortest_ride = df["distance"].min()
 print(f"Longest Ride: {longest_ride:.2f} miles")
 print(f"Shortest Ride: {shortest_ride:.2f} miles")
 
+# Calculate cumulative distance by hour of the day
+cumulative_distance_by_hour = df.groupby("hour")["distance"].sum()
+
 # Time of Day Analysis
 hourly_rides = df.groupby("hour").size()
 
-# Heatmap of Speed by Day of Week and Hour
-speed_heatmap_data = (
+# Heatmap of Cumulative Distance by Day of Week and Hour
+cum_distance_heatmap_data = (
+    df.groupby(["day_of_week", "hour"])["distance"]
+    .sum()
+    .round()
+    .unstack()
+    .fillna(0)
+    .astype(int)
+).reindex(ordered_days)
+
+# Heatmap of Top Speed by Day of Week and Hour
+top_speed_heatmap_data = (
+    df.groupby(["day_of_week", "hour"])["topSpeedOw"]
+    .max()
+    .round()
+    .unstack()
+    .fillna(0)
+    .astype(int)
+).reindex(ordered_days)
+
+# Heatmap of Average Speed by Day of Week and Hour
+average_speed_heatmap_data = (
     df.groupby(["day_of_week", "hour"])["averageSpeed"]
     .mean()
     .round()
     .unstack()
     .fillna(0)
     .astype(int)
-)
+).reindex(ordered_days)
 
 # Duration Between Rides
 df_sorted_by_date["duration_between_rides"] = df_sorted_by_date[
@@ -135,117 +155,163 @@ df["efficiency"] = df["distance"] / (
 dpi_value = 100  # This can be adjusted based on the specific DPI of your target device or output
 # Create a 4x3 grid of subplots
 fig, axes = plt.subplots(
-    4, 3, figsize=(3674 / dpi_value, 2036 / dpi_value), dpi=dpi_value
+    5, 3, figsize=(3674 / dpi_value, 2036 / dpi_value), dpi=dpi_value
 )
 
-# Plot 11: Daily Frequency
-axes[3, 1].scatter(rides_per_day_reindexed.index, rides_per_day_reindexed.values)
-axes[3, 1].set_title("Number of Rides per Day")
-axes[3, 1].set_xlabel("Date")
-axes[3, 1].set_ylabel("Number of Rides")
-axes[3, 1].grid(True)
+##############################################################################################################
 
-# Plot 4: Distribution of Top Speeds
-axes[1, 0].hist(
-    df["topSpeedOw"], bins=30, color=colors[1], edgecolor=colors[0], alpha=0.7
+# Plot 0,0: Cumulative Distance Over Time
+axes[0, 0].plot(
+    df_sorted_by_date["timestamp"],
+    df_sorted_by_date["cumulative_distance"],
+    color=colors[2],
 )
-axes[1, 0].set_title("Distribution of Top Speeds")
-axes[1, 0].set_xlabel("Speed (mph)")
+axes[0, 0].set_title("Cumulative Distance Over Time")
+axes[0, 0].set_xlabel("Date")
+axes[0, 0].set_ylabel("Cumulative Distance (miles)")
+axes[0, 0].grid(True, alpha=0.2)
+
+
+# Plot 4,1: Ride Distance vs. Average Speed
+axes[0, 1].scatter(df["averageSpeed"], df["distance"], color=colors[5], alpha=0.7)
+axes[0, 1].set_title("Ride Distance vs. Average Speed")
+axes[0, 1].set_xlabel("Average Speed (mph)")
+axes[0, 1].set_ylabel("Ride Distance (miles)")
+axes[0, 1].grid(True, alpha=0.2)
+
+# Plot 4,2: Number of Rides by Hour of the Day
+axes[0, 2].bar(hourly_rides.index, hourly_rides.values, color=colors[6])
+axes[0, 2].set_title("Number of Rides by Hour of the Day")
+axes[0, 2].set_xlabel("Hour of the Day")
+axes[0, 2].set_ylabel("Number of Rides")
+axes[0, 2].grid(True, alpha=0.2)
+
+##############################################################################################################
+
+# Plot 1,0: Distribution of Ride Distances
+sns.histplot(
+    df["distance"], bins=30, kde=True, color=colors[4], edgecolor="white", ax=axes[1, 0]
+)
+axes[1, 0].set_title("Distribution of Ride Distances")
+axes[1, 0].set_xlabel("Distance (miles)")
 axes[1, 0].set_ylabel("Frequency")
 axes[1, 0].grid(True, alpha=0.2)
 
-# Plot 12: Heatmap of Rides by Day of Week and Hour
-sns.heatmap(
-    heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt=".0f", ax=axes[3, 2]
+# Plot 1,1: Ride Distance Over Time
+axes[1, 1].scatter(
+    df_sorted_by_date["timestamp"], df_sorted_by_date["distance"], color=colors[8]
 )
-axes[3, 2].set_title("Ride Frequency by Day of Week and Hour")
+axes[1, 1].set_title("Ride Distance Over Time")
+axes[1, 1].set_xlabel("Date")
+axes[1, 1].set_ylabel("Distance (miles)")
+axes[1, 1].grid(True, alpha=0.2)
 
-# Plot 7: Distribution of Average Speeds
+# Plot 1,2: Heatmap of Cumulative Distance by Day of Week and Hour
+sns.heatmap(
+    cum_distance_heatmap_data,
+    cmap=colors,
+    linewidths=0.5,
+    annot=True,
+    fmt="d",
+    ax=axes[1, 2],
+)
+axes[1, 2].set_title("Cumulative Distance by Day of Week and Hour")
+
+##############################################################################################################
+
+# Plot 2,0: Distribution of Top Speeds
+axes[2, 0].hist(
+    df["topSpeedOw"], bins=30, color=colors[1], edgecolor=colors[0], alpha=0.7
+)
+axes[2, 0].set_title("Distribution of Top Speeds")
+axes[2, 0].set_xlabel("Speed (mph)")
+axes[2, 0].set_ylabel("Frequency")
+axes[2, 0].grid(True, alpha=0.2)
+
+# Plot 2,1: Top Speed Over Time with Gaps
+axes[2, 1].scatter(
+    df_sorted_by_date["timestamp"], df_sorted_by_date["topSpeedOw"], color=colors[3]
+)
+axes[2, 1].set_title("Top Speed Over Time")
+axes[2, 1].set_xlabel("Date")
+axes[2, 1].set_ylabel("Top Speed (mph)")
+axes[2, 1].grid(True, alpha=0.2)
+
+# Plot 2,2: Heatmap of Top Speed by Day of Week and Hour
+sns.heatmap(
+    top_speed_heatmap_data,
+    cmap=colors,
+    linewidths=0.5,
+    annot=True,
+    fmt="d",
+    ax=axes[2, 2],
+)
+axes[2, 2].set_title("Top Speed by Day of Week and Hour")
+
+##############################################################################################################
+
+# Plot 3,0: Distribution of Average Speeds
 sns.histplot(
     df["averageSpeed"],
     bins=30,
     kde=True,
     color=colors[2],
     edgecolor=colors[0],
-    ax=axes[2, 0],
+    ax=axes[3, 0],
 )
+axes[3, 0].set_title("Distribution of Average Speeds")
+axes[3, 0].set_xlabel("Average Speed (mph)")
+axes[3, 0].set_ylabel("Frequency")
+axes[3, 0].grid(True, alpha=0.2)
 
-axes[2, 0].set_title("Distribution of Average Speeds")
-axes[2, 0].set_xlabel("Average Speed (mph)")
-axes[2, 0].set_ylabel("Frequency")
-axes[2, 0].grid(True, alpha=0.2)
-
-# Plot 3: Cumulative Distance Over Time
-axes[0, 2].plot(
-    df_sorted_by_date["timestamp"],
-    df_sorted_by_date["cumulative_distance"],
-    color=colors[2],
-)
-axes[0, 2].set_title("Cumulative Distance Over Time")
-axes[0, 2].set_xlabel("Date")
-axes[0, 2].set_ylabel("Cumulative Distance (miles)")
-axes[0, 2].grid(True, alpha=0.2)
-
-# Plot 6: Average Speed Over Time with Gaps
-axes[2, 1].scatter(
+# Plot 3,1: Average Speed Over Time with Gaps
+axes[3, 1].scatter(
     df_sorted_by_date["timestamp"], df_sorted_by_date["averageSpeed"], color=colors[3]
 )
-axes[2, 1].set_title("Average Speed Over Time")
-axes[2, 1].set_xlabel("Date")
-axes[2, 1].set_ylabel("Average Speed (mph)")
-axes[2, 1].grid(True, alpha=0.2)
+axes[3, 1].set_title("Average Speed Over Time")
+axes[3, 1].set_xlabel("Date")
+axes[3, 1].set_ylabel("Average Speed (mph)")
+axes[3, 1].grid(True, alpha=0.2)
 
-# Plot 1: Distribution of Ride Distances
-sns.histplot(
-    df["distance"], bins=30, kde=True, color=colors[4], edgecolor="white", ax=axes[0, 0]
+# Plot 3,2: Heatmap of Average Speed by Day of Week and Hour
+sns.heatmap(
+    average_speed_heatmap_data,
+    cmap=colors,
+    linewidths=0.5,
+    annot=True,
+    fmt="d",
+    ax=axes[3, 2],
 )
-axes[0, 0].set_title("Distribution of Ride Distances")
-axes[0, 0].set_xlabel("Distance (miles)")
-axes[0, 0].set_ylabel("Frequency")
-axes[0, 0].grid(True, alpha=0.2)
+axes[3, 2].set_title("Average Speed by Day of Week and Hour")
 
-# Plot 5: Max Speed vs. Average Speed
-axes[1, 1].scatter(df["averageSpeed"], df["topSpeedOw"], color=colors[5], alpha=0.7)
-axes[1, 1].set_title("Max Speed vs. Average Speed")
-axes[1, 1].set_xlabel("Average Speed (mph)")
-axes[1, 1].set_ylabel("Max Speed (mph)")
-axes[1, 1].grid(True, alpha=0.2)
+##############################################################################################################
 
-# Plot 8: Number of Rides by Hour of the Day
-axes[1, 2].bar(hourly_rides.index, hourly_rides.values, color=colors[6])
-axes[1, 2].set_title("Number of Rides by Hour of the Day")
-axes[1, 2].set_xlabel("Hour of the Day")
-axes[1, 2].set_ylabel("Number of Rides")
-axes[1, 2].grid(True, alpha=0.2)
-
-# Plot 10: Distribution of Duration Between Rides
+# Plot 4,0: Distribution of Duration Between Rides
 sns.histplot(
     df_sorted_by_date["duration_between_rides"],
     bins=30,
     kde=True,
     color=colors[7],
     edgecolor="white",
-    ax=axes[3, 0],
+    ax=axes[4, 0],
 )
-axes[3, 0].set_title("Duration Between Rides")
-axes[3, 0].set_xlabel("Duration (days)")
-axes[3, 0].set_ylabel("Frequency")
-axes[3, 0].grid(True, alpha=0.2)
+axes[4, 0].set_title("Duration Between Rides")
+axes[4, 0].set_xlabel("Duration (days)")
+axes[4, 0].set_ylabel("Frequency")
+axes[4, 0].grid(True, alpha=0.2)
 
-# Plot 2: Ride Distance Over Time
-axes[0, 1].scatter(
-    df_sorted_by_date["timestamp"], df_sorted_by_date["distance"], color=colors[8]
-)
-axes[0, 1].set_title("Ride Distance Over Time")
-axes[0, 1].set_xlabel("Date")
-axes[0, 1].set_ylabel("Distance (miles)")
-axes[0, 1].grid(True, alpha=0.2)
+# Plot 4,1: Daily Frequency
+axes[4, 1].scatter(rides_per_day_reindexed.index, rides_per_day_reindexed.values)
+axes[4, 1].set_title("Number of Rides per Day")
+axes[4, 1].set_xlabel("Date")
+axes[4, 1].set_ylabel("Number of Rides")
+axes[4, 1].grid(True)
 
-# Plot 9: Heatmap of Average Speed by Day of Week and Hour
+# Plot 4,2: Heatmap of Rides by Day of Week and Hour
 sns.heatmap(
-    speed_heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt="d", ax=axes[2, 2]
+    heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt=".0f", ax=axes[4, 2]
 )
-axes[2, 2].set_title("Average Speed by Day of Week and Hour")
+axes[4, 2].set_title("Ride Frequency by Day of Week and Hour")
 
 # Grid, Title, XLabel, YLabel Adjustments
 for i in range(4):
