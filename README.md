@@ -53,10 +53,8 @@ This data is saved locally for further processing.
 After aggregating ride data, the `folium` library is utilized to plot the rides on a dark-themed map. Each ride is represented as a path.
 
 #### Example Map
-<img src="example_map.png" alt="drawing" width="500"/>
 
-#### Example Zoomed Map
-<img src="example_zoomed.png" alt="drawing" width="500"/>
+<img src="example_map.png" alt="drawing" width="500"/>
 
 To view and explore the aggregated map:
 
