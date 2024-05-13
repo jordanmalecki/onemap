@@ -23,7 +23,7 @@ https://app.onewheel.com/wp-json/fm/v2/trails
   * Maximum search distance in miles
   * OneWheel app nickname (as displayed on leaderboards)
 
-    ![Example Inputs](https://file+.vscode-resource.vscode-cdn.net/mnt/mag/lab/onemap/example_inputs.png)
+    ![Example Inputs](example_inputs.png)
 * These inputs are then saved to `config.json` for future runs.
 
  **Subsequent Runs** :
