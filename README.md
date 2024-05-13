@@ -16,13 +16,19 @@ https://app.onewheel.com/wp-json/fm/v2/trails
 
 ### 2. **User Input**:
 
-The user is prompted to provide:
+ **Initial Run** :
 
-- A location (e.g., 'Buffalo, NY')
-- Maximum search distance in miles
-- OneWheel app nickname (as displayed on leaderboards)
+* If `ONEMAP_LOCATION`, `ONEMAP_MAX_DISTANCE`, or `ONEMAP_NICKNAME` are not set in `config.json`, the user is prompted to provide:
+  * A location (e.g., 'Buffalo, NY')
+  * Maximum search distance in miles
+  * OneWheel app nickname (as displayed on leaderboards)
 
-![Example Inputs](example_inputs.png)
+    ![Example Inputs](https://file+.vscode-resource.vscode-cdn.net/mnt/mag/lab/onemap/example_inputs.png)
+* These inputs are then saved to `config.json` for future runs.
+
+ **Subsequent Runs** :
+
+* The application uses the values stored in `config.json` without prompting the user.
 
 ### 3. **Filtering Rides**:
 
@@ -32,7 +38,7 @@ With the user input, the program filters rides based on the provided location us
 
 Before diving into the augmentation process, it's important to note that the trail and localized filter data fetched initially will include **ALL** rides in the specified area. The program then individually checks each ride to determine if the user matches the provided input. Due to this, if a large area is specified, the process can be time-consuming.
 
-For each filtered ride:
+For each filtered ride with an ID greater than the highest existing ID in `user_rides.json`:
 
 - Details are fetched from:
 
@@ -112,8 +118,18 @@ To view and explore the aggregated map:
    - Right-click and select 'Inspect' or press `Ctrl+Shift+I` (or `Cmd+Option+I` on Mac).
    - Navigate to the 'Network' tab.
    - Refresh the page or interact with the website or perform actions that trigger the relevant requests (e.g., viewing ride details).
-   - Filter the requests to locate the specific endpoints used in this project, such as `https://app.onewheel.com/wp-json/fm/v2/trails` and related endpoints (I.E. filtering by "v2" would work).
+   - Filter the requests to locate the specific endpoints used in this project, such as `https://app.onewheel.com/wp-json/fm/v2/trails` and related endpoints (e.g., filtering by "v2" would work).
    - Once you identify a relevant request, click on it and copy the 'Request Headers' and 'Cookies' to use in the `config.py` file.
+
+3. **Initial User Input**:
+
+   On the first run, if `ONEMAP_LOCATION`, `ONEMAP_MAX_DISTANCE`, or `ONEMAP_NICKNAME` are not set in `config.json`, the program will prompt for these inputs:
+
+   - **Location**: E.g., 'Buffalo, NY'
+   - **Maximum Distance**: In miles
+   - **Nickname**: Your OneWheel app nickname
+
+   These inputs will be saved to `config.json` for future runs, eliminating the need for repeated input. Subsequent runs will use the saved values.
 
 ## Usage
 
