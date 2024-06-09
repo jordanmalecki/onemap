@@ -6,6 +6,7 @@ import json
 import calmap
 from datetime import datetime
 
+
 def plot_statistics(input_path, output_dir):
     # Set Seaborn darkgrid style
     sns.set_style("darkgrid")
@@ -58,8 +59,9 @@ def plot_statistics(input_path, output_dir):
 
     # Check if there are any NaT (Not a Timestamp) entries after conversion
     if df["timestamp"].isna().any():
-        print("Warning: Some timestamp values couldn't be converted to datetime format.")
-
+        print(
+            "Warning: Some timestamp values couldn't be converted to datetime format."
+        )
 
     # Function to remove outliers using the IQR method
     def remove_outliers(df, column):
@@ -69,7 +71,6 @@ def plot_statistics(input_path, output_dir):
         lower_bound = Q1 - 1.5 * IQR
         upper_bound = Q3 + 1.5 * IQR
         return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
-
 
     # Remove outliers for relevant columns
     df = remove_outliers(df, "distance")
@@ -243,7 +244,8 @@ def plot_statistics(input_path, output_dir):
     plt.grid(True, alpha=0.2)
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "number_of_rides_by_hour_of_the_day.png"), dpi=dpi_value
+        os.path.join(output_dir, "number_of_rides_by_hour_of_the_day.png"),
+        dpi=dpi_value,
     )
     plt.close()
 
@@ -304,7 +306,9 @@ def plot_statistics(input_path, output_dir):
     plt.grid(True, alpha=0.2)
     plt.tight_layout()
     plt.xticks(range(0, 24))  # Show all hours on the x-axis
-    plt.savefig(os.path.join(output_dir, "cumulative_distance_by_hour.png"), dpi=dpi_value)
+    plt.savefig(
+        os.path.join(output_dir, "cumulative_distance_by_hour.png"), dpi=dpi_value
+    )
     plt.close()
 
     # Total distance by day of the week
@@ -319,10 +323,10 @@ def plot_statistics(input_path, output_dir):
     plt.grid(True, alpha=0.2)
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "cumulative_distance_by_day_of_week.png"), dpi=dpi_value
+        os.path.join(output_dir, "cumulative_distance_by_day_of_week.png"),
+        dpi=dpi_value,
     )
     plt.close()
-
 
     # Plot: Distribution of Top Speeds
     plt.figure(figsize=(12, 6))
@@ -332,7 +336,9 @@ def plot_statistics(input_path, output_dir):
     plt.ylabel("Frequency")
     plt.grid(True, alpha=0.2)
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "distribution_of_top_speeds.png"), dpi=dpi_value)
+    plt.savefig(
+        os.path.join(output_dir, "distribution_of_top_speeds.png"), dpi=dpi_value
+    )
     plt.close()
 
     # Plot: Top Speed Over Time
@@ -388,7 +394,9 @@ def plot_statistics(input_path, output_dir):
     # Plot: Average Speed Over Time
     plt.figure(figsize=(12, 6))
     plt.scatter(
-        df_sorted_by_date["timestamp"], df_sorted_by_date["averageSpeed"], color=colors[3]
+        df_sorted_by_date["timestamp"],
+        df_sorted_by_date["averageSpeed"],
+        color=colors[3],
     )
     plt.title("Average Speed Over Time")
     plt.xlabel("Date")
@@ -412,7 +420,8 @@ def plot_statistics(input_path, output_dir):
     plt.ylabel("Day of Week")
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "average_speed_by_day_of_week_and_hour.png"), dpi=dpi_value
+        os.path.join(output_dir, "average_speed_by_day_of_week_and_hour.png"),
+        dpi=dpi_value,
     )
     plt.close()
 
@@ -452,7 +461,9 @@ def plot_statistics(input_path, output_dir):
     )
 
     plt.title("Calendar Heatmap of Ride Frequency")
-    plt.savefig(os.path.join(output_dir, "calendar_heatmap_ride_frequency.png"), dpi=281)
+    plt.savefig(
+        os.path.join(output_dir, "calendar_heatmap_ride_frequency.png"), dpi=281
+    )
     plt.close()
     # Box Plot for Ride Frequency by Hour
     # Calculate the number of rides for each hour
@@ -533,7 +544,9 @@ def plot_statistics(input_path, output_dir):
 
     # Riding Time Variability by Hour of the Day with white whiskers
     plt.figure(figsize=(12, 6))
-    ax = sns.boxplot(data=df, x="hour", y="ridingTimeMinutes", color=colors[4], dodge=False)
+    ax = sns.boxplot(
+        data=df, x="hour", y="ridingTimeMinutes", color=colors[4], dodge=False
+    )
 
     # Customize the whiskers to be white
     for whisker in ax.artists:
@@ -554,7 +567,6 @@ def plot_statistics(input_path, output_dir):
     )
     plt.close()
 
-
     # Histogram of Riding Time Distribution
     plt.figure(figsize=(12, 6))
     sns.histplot(df["ridingTimeMinutes"], bins=30, kde=True, color=colors[4])
@@ -564,6 +576,7 @@ def plot_statistics(input_path, output_dir):
     plt.grid(True, alpha=0.2)
     plt.tight_layout()
     plt.savefig(
-        os.path.join(output_dir, "histogram_of_riding_time_distribution.png"), dpi=dpi_value
+        os.path.join(output_dir, "histogram_of_riding_time_distribution.png"),
+        dpi=dpi_value,
     )
     plt.close()
