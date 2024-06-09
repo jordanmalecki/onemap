@@ -86,3 +86,4 @@ data/*
 config.py
 rides_map_dark.html
 dashboard.png
+out/

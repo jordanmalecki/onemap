@@ -9,14 +9,12 @@ This project is designed to aggregate and visualize a user's OneWheel app rides 
 ### 1. **Fetching General Ride Data**:
 
 The program starts by retrieving general ride details from the endpoint:
-
-```
 https://app.onewheel.com/wp-json/fm/v2/trails
-```
+
 
 ### 2. **User Input**:
 
- **Initial Run** :
+**Initial Run**:
 
 * If `ONEMAP_LOCATION`, `ONEMAP_MAX_DISTANCE`, or `ONEMAP_NICKNAME` are not set in `config.json`, the user is prompted to provide:
   * A location (e.g., 'Buffalo, NY')
@@ -26,7 +24,7 @@ https://app.onewheel.com/wp-json/fm/v2/trails
     ![Example Inputs](example_inputs.png)
 * These inputs are then saved to `config.json` for future runs.
 
- **Subsequent Runs** :
+**Subsequent Runs**:
 
 * The application uses the values stored in `config.json` without prompting the user.
 
@@ -41,16 +39,12 @@ Before diving into the augmentation process, it's important to note that the tra
 For each filtered ride with an ID greater than the highest existing ID in `user_rides.json`:
 
 - Details are fetched from:
-
-```
 https://app.onewheel.com/wp-json/fm/v2/trails/1?trackId={ride_id}
-```
+
 
 - If the ride matches the user's nickname, further detailed coordinates for the ride are fetched from:
-
-```
 https://app.onewheel.com/wp-json/fm/v2/trailscoordinates/{ride_id}
-```
+
 
 This data is saved locally for further processing.
 
@@ -67,10 +61,22 @@ To view and explore the aggregated map:
 1. Navigate to the local path where `rides_map_dark.html` is saved.
 2. Open `rides_map_dark.html` in your preferred web browser.
 
+### 6. **Stats**:
+
+Ride stats are visulized using the combined `plot_stats.py` and `one_stat.py` functionalities integrated into the main process.
+
+When you run the main script (`run.py`), it will:
+- Generate individual statistical plot images in the `out` directory.
+- Combine these individual plots into a single comprehensive `combined_plots.png` file in the `out` directory.
+
+Example stats:
+
+<img src="example_dashboard.png" alt="drawing" width="300"/>
+
 ## Prerequisites
 
 - Python 3.x
-- Required Python packages: `requests`, `folium`, `geopy`
+- Required Python packages: `requests`, `folium`, `geopy`, `matplotlib`, `seaborn`, `pandas`, `Pillow`, `calmap`
 
 ## Setup
 
@@ -139,34 +145,11 @@ Navigate to the project directory (ensure your virtual environment is activated)
 python run.py
 ```
 
-## Dashboard:
-
-**Disclaimer:** *The api does specify the units for some fields. As such, units and subsequent unit conversions used in the dashboard are probably not accurate - contributions are welcome.*
-
-After you've aggregated your rides using the main script (and it created a `data/user_rides.json`), you can visualize some of your ride stats using the `plot_stats.py` script.
-
-#### Steps to Generate the Dashboard:
-
-1. Ensure you've already executed `run.py` and have `user_rides.json` generated.
-2. Navigate to the project directory (ensure your virtual environment is activated) and execute:
-
-   ```bash
-   python viz/plot_stats.py
-   ```
-3. This will do two things:
-
-   (a) Generate a `dashboard.png` file.
-
-   (b) Open an interactive window containing the dashboard (If a GUI is available).
-
-Example dashboard:
-
-![Example Dashboard](example_dashboard.png)
+This command will fetch, filter, augment, and visualize your OneWheel ride data, and generate both an interactive map and a comprehensive statistical dashboard in the `out` directory.
 
 ## Contributing
 
 Pull requests are welcome. For significant changes, please open an issue first to discuss.
 
 ## License
-
 [MIT](https://choosealicense.com/licenses/mit/)
