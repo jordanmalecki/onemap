@@ -2,7 +2,7 @@
 
 This project is designed to aggregate and visualize a user's OneWheel app rides based on a user-specified location.
 
-***NOTE***: *Recorded ride must be set to "public" within the OneWheel app in order to be captured and included in the aggregation.*
+**_NOTE_**: _Recorded ride must be set to "public" within the OneWheel app in order to be captured and included in the aggregation._
 
 ## How?
 
@@ -15,17 +15,19 @@ https://app.onewheel.com/wp-json/fm/v2/trails
 
 **Initial Run**:
 
-* If `ONEMAP_LOCATION`, `ONEMAP_MAX_DISTANCE`, or `ONEMAP_NICKNAME` are not set in `config.json`, the user is prompted to provide:
-  * A location (e.g., 'Buffalo, NY')
-  * Maximum search distance in miles
-  * OneWheel app nickname (as displayed on leaderboards)
+- If `ONEMAP_LOCATION`, `ONEMAP_MAX_DISTANCE`, or `ONEMAP_NICKNAME` are not set in `config.json`, the user is prompted to provide:
+
+  - A location (e.g., 'Buffalo, NY')
+  - Maximum search distance in miles
+  - OneWheel app nickname (as displayed on leaderboards)
 
     ![Example Inputs](example_inputs.png)
-* These inputs are then saved to `config.json` for future runs.
+
+- These inputs are then saved to `config.json` for future runs.
 
 **Subsequent Runs**:
 
-* The application uses the values stored in `config.json` without prompting the user.
+- The application uses the values stored in `config.json` without prompting the user.
 
 ### 3. **Filtering Rides**:
 
@@ -82,6 +84,7 @@ Example stats:
    ```bash
    git clone https://github.com/jordanmalecki/onemap.git
    ```
+
 2. **Set up a virtual environment**:
 
    Navigate to the project directory and create a virtual environment:
@@ -100,19 +103,12 @@ Example stats:
      ```bash
      source .venv/bin/activate
      ```
+
 3. **Install required packages**:
 
    ```bash
    pip install -r requirements.txt
    ```
-
-   **Note on Missing Modules:**
-
-   - Ensure `calmap` and `setuptools` are included in `requirements.txt` to avoid missing module errors:
-     ```plaintext
-     calmap==0.0.9
-     setuptools==67.1.0
-     ```
 
 ## Configuration:
 
@@ -127,22 +123,25 @@ Example stats:
      - **Nickname**: Your OneWheel app nickname (display name on leaderboards).
 
      These inputs will be saved to `config.json` for future runs, eliminating the need for repeated input.
+
    - You can also manually create and set up `config.json` with the following structure:
 
      ```json
      {
-         "ONEMAP_LOCATION": "Your_Location_Here",
-         "ONEMAP_MAX_DISTANCE": 10.0,
-         "ONEMAP_NICKNAME": "Your_Nickname_Here"
+       "ONEMAP_LOCATION": "Your_Location_Here",
+       "ONEMAP_MAX_DISTANCE": 10.0,
+       "ONEMAP_NICKNAME": "Your_Nickname_Here"
      }
      ```
 
      Replace `"Your_Location_Here"`, `10.0`, and `"Your_Nickname_Here"` with your actual location, preferred distance in miles, and OneWheel nickname respectively.
+
 2. **Rename `config_example.py` to `config.py`**:
 
    ```bash
    mv config_example.py config.py
    ```
+
 3. **Update `config.py` with the necessary headers and cookies**:
 
    These can be obtained by inspecting the network requests made while browsing public rides.
