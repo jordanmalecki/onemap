@@ -1,7 +1,12 @@
+import os
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 import pandas as pd
-import json
 import seaborn as sns
+import json
+from PIL import Image
+import calmap
+from datetime import datetime
 
 # Set Seaborn darkgrid style
 sns.set_style("darkgrid")
@@ -16,6 +21,12 @@ plt.rcParams["text.color"] = "white"
 plt.rcParams["axes.labelcolor"] = "white"
 plt.rcParams["xtick.color"] = "white"
 plt.rcParams["ytick.color"] = "white"
+plt.rcParams["font.family"] = "DejaVu Sans"  # Set default font to DejaVu Sans
+plt.rcParams["font.sans-serif"] = ["DejaVu Sans"]  # Ensure DejaVu Sans is used
+
+# Create output directory if it doesn't exist
+output_dir = "out"
+os.makedirs(output_dir, exist_ok=True)
 
 # Load the data from JSON
 with open("data/user_rides.json", "r") as file:
@@ -23,8 +34,11 @@ with open("data/user_rides.json", "r") as file:
     rides = [ride for sublist in data for ride in sublist]
     df = pd.DataFrame(rides)
 
-# Convert units to more familiar metrics
-df["ridingTime"] = df["ridingTime"].apply(lambda x: f"{x // 3600}h {(x % 3600) // 60}m")
+# Convert riding time to numeric type for arithmetic operations
+df["ridingTime"] = pd.to_numeric(df["ridingTime"], errors="coerce")
+
+# Now convert riding time from seconds to minutes
+df["ridingTimeMinutes"] = df["ridingTime"] / 60  # Convert seconds to minutes
 
 # Assuming the distances are in kilometers, convert to miles
 km_to_miles_conversion = 0.621371
@@ -48,16 +62,37 @@ df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
 if df["timestamp"].isna().any():
     print("Warning: Some timestamp values couldn't be converted to datetime format.")
 
+
+# Function to remove outliers using the IQR method
+def remove_outliers(df, column):
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+
+
+# Remove outliers for relevant columns
+df = remove_outliers(df, "distance")
+df = remove_outliers(df, "averageSpeed")
+df = remove_outliers(df, "topSpeedOw")
+df = remove_outliers(df, "ridingTimeMinutes")
+
 # Group by date and count the number of rides per day
 rides_per_day = df.groupby(df["timestamp"].dt.date).size()
 
 # Create a date range from the minimum to the maximum date in the dataset
 all_dates = pd.date_range(
-    start=df["timestamp"].min().date(), end=df["timestamp"].max().date()
+    start=df["timestamp"].min().date(), end=datetime.today().date()
 )
 
 # Reindex the rides_per_day series to include all dates and fill missing values with 0
 rides_per_day_reindexed = rides_per_day.reindex(all_dates, fill_value=0)
+
+# Convert the index to datetime format and ensure values are integers
+rides_per_day_reindexed.index = pd.to_datetime(rides_per_day_reindexed.index)
+rides_per_day_reindexed = rides_per_day_reindexed.astype(int)
 
 # Extract day of week and hour for heatmaps
 df["day_of_week"] = df["timestamp"].dt.day_name()
@@ -147,189 +182,390 @@ longest_rest = df_sorted_by_date["duration_between_rides"].max()
 print(f"Longest Rest Period: {longest_rest:.2f} days")
 
 # Efficiency Analysis
-df["efficiency"] = df["distance"] / (
-    df["ridingTimeCalculated"] / 3600
+df_sorted_by_date["efficiency"] = df_sorted_by_date["distance"] / (
+    df_sorted_by_date["ridingTimeCalculated"] / 3600
 )  # miles per hour
 
+# Define DPI for high resolution
+dpi_value = 150
 
-dpi_value = 100  # This can be adjusted based on the specific DPI of your target device or output
-# Create a 4x3 grid of subplots
-fig, axes = plt.subplots(
-    5, 3, figsize=(3674 / dpi_value, 2036 / dpi_value), dpi=dpi_value
-)
+# Save plots as separate PNG files
 
-##############################################################################################################
-
-# Plot 0,0: Cumulative Distance Over Time
-axes[0, 0].plot(
+# Plot: Cumulative Distance Over Time
+plt.figure(figsize=(12, 6))
+plt.plot(
     df_sorted_by_date["timestamp"],
     df_sorted_by_date["cumulative_distance"],
     color=colors[2],
 )
-axes[0, 0].set_title("Cumulative Distance Over Time")
-axes[0, 0].set_xlabel("Date")
-axes[0, 0].set_ylabel("Cumulative Distance (miles)")
-axes[0, 0].grid(True, alpha=0.2)
-
-
-# Plot 4,1: Ride Distance vs. Average Speed
-axes[0, 1].scatter(df["averageSpeed"], df["distance"], color=colors[5], alpha=0.7)
-axes[0, 1].set_title("Ride Distance vs. Average Speed")
-axes[0, 1].set_xlabel("Average Speed (mph)")
-axes[0, 1].set_ylabel("Ride Distance (miles)")
-axes[0, 1].grid(True, alpha=0.2)
-
-# Plot 4,2: Number of Rides by Hour of the Day
-axes[0, 2].bar(hourly_rides.index, hourly_rides.values, color=colors[6])
-axes[0, 2].set_title("Number of Rides by Hour of the Day")
-axes[0, 2].set_xlabel("Hour of the Day")
-axes[0, 2].set_ylabel("Number of Rides")
-axes[0, 2].grid(True, alpha=0.2)
-
-##############################################################################################################
-
-# Plot 1,0: Distribution of Ride Distances
-sns.histplot(
-    df["distance"], bins=30, kde=True, color=colors[4], edgecolor="white", ax=axes[1, 0]
+plt.title("Cumulative Distance Over Time")
+plt.xlabel("Date")
+plt.ylabel("Cumulative Distance (miles)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "cumulative_distance_over_time.png"), dpi=dpi_value
 )
-axes[1, 0].set_title("Distribution of Ride Distances")
-axes[1, 0].set_xlabel("Distance (miles)")
-axes[1, 0].set_ylabel("Frequency")
-axes[1, 0].grid(True, alpha=0.2)
+plt.close()
 
-# Plot 1,1: Ride Distance Over Time
-axes[1, 1].scatter(
+# Plot: Ride Distance vs. Average Speed
+plt.figure(figsize=(12, 6))
+plt.scatter(df["averageSpeed"], df["distance"], color=colors[5], alpha=0.7)
+plt.title("Ride Distance vs. Average Speed")
+plt.xlabel("Average Speed (mph)")
+plt.ylabel("Ride Distance (miles)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "ride_distance_vs_average_speed.png"), dpi=dpi_value
+)
+plt.close()
+
+# Bar Plot for Total Number of Rides per Day of the Week
+rides_per_weekday = df["day_of_week"].value_counts().reindex(ordered_days)
+
+plt.figure(figsize=(12, 6))
+sns.barplot(x=rides_per_weekday.index, y=rides_per_weekday.values, color=colors[6])
+plt.title("Number of Rides by Day of the Week")
+plt.xlabel("Day of the Week")
+plt.ylabel("Total Number of Rides")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "number_of_rides_by_day_of_week.png"), dpi=dpi_value
+)
+plt.close()
+
+# Plot: Number of Rides by Hour of the Day
+plt.figure(figsize=(12, 6))
+plt.bar(hourly_rides.index, hourly_rides.values, color=colors[6])
+plt.title("Number of Rides by Hour of the Day")
+plt.xlabel("Hour of the Day")
+plt.ylabel("Number of Rides")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "number_of_rides_by_hour_of_the_day.png"), dpi=dpi_value
+)
+plt.close()
+
+# Plot: Distribution of Ride Distances
+plt.figure(figsize=(12, 6))
+sns.histplot(df["distance"], bins=30, kde=True, color=colors[4], edgecolor="white")
+plt.title("Distribution of Ride Distances")
+plt.xlabel("Distance (miles)")
+plt.ylabel("Frequency")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "distribution_of_ride_distances.png"), dpi=dpi_value
+)
+plt.close()
+
+# Plot: Ride Distance Over Time
+plt.figure(figsize=(12, 6))
+plt.scatter(
     df_sorted_by_date["timestamp"], df_sorted_by_date["distance"], color=colors[8]
 )
-axes[1, 1].set_title("Ride Distance Over Time")
-axes[1, 1].set_xlabel("Date")
-axes[1, 1].set_ylabel("Distance (miles)")
-axes[1, 1].grid(True, alpha=0.2)
+plt.title("Ride Distance Over Time")
+plt.xlabel("Date")
+plt.ylabel("Distance (miles)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(os.path.join(output_dir, "ride_distance_over_time.png"), dpi=dpi_value)
+plt.close()
 
-# Plot 1,2: Heatmap of Cumulative Distance by Day of Week and Hour
+# Plot: Heatmap of Cumulative Distance by Day of Week and Hour
+plt.figure(figsize=(12, 6))
 sns.heatmap(
     cum_distance_heatmap_data,
-    cmap=colors,
+    cmap="viridis",
     linewidths=0.5,
     annot=True,
     fmt="d",
-    ax=axes[1, 2],
 )
-axes[1, 2].set_title("Cumulative Distance by Day of Week and Hour")
-
-##############################################################################################################
-
-# Plot 2,0: Distribution of Top Speeds
-axes[2, 0].hist(
-    df["topSpeedOw"], bins=30, color=colors[1], edgecolor=colors[0], alpha=0.7
+plt.title("Cumulative Distance by Day of Week and Hour")
+plt.xlabel("Hour")
+plt.ylabel("Day of Week")
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "cumulative_distance_by_day_of_week_and_hour.png"),
+    dpi=dpi_value,
 )
-axes[2, 0].set_title("Distribution of Top Speeds")
-axes[2, 0].set_xlabel("Speed (mph)")
-axes[2, 0].set_ylabel("Frequency")
-axes[2, 0].grid(True, alpha=0.2)
+plt.close()
 
-# Plot 2,1: Top Speed Over Time with Gaps
-axes[2, 1].scatter(
+# Total distance by hour of the day
+distance_by_hour = df.groupby("hour")["distance"].sum()
+
+# Plot: Total Distance by Hour of the Day
+plt.figure(figsize=(12, 6))
+plt.bar(distance_by_hour.index, distance_by_hour.values, color=colors[5])
+plt.title("Cumulative Distance by Hour of the Day")
+plt.xlabel("Hour of the Day")
+plt.ylabel("Total Distance (miles)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.xticks(range(0, 24))  # Show all hours on the x-axis
+plt.savefig(os.path.join(output_dir, "cumulative_distance_by_hour.png"), dpi=dpi_value)
+plt.close()
+
+# Total distance by day of the week
+distance_by_day = df.groupby("day_of_week")["distance"].sum().reindex(ordered_days)
+
+# Plot: Total Distance by Day of the Week
+plt.figure(figsize=(12, 6))
+plt.bar(distance_by_day.index, distance_by_day.values, color=colors[6])
+plt.title("Cumulative Distance by Day of the Week")
+plt.xlabel("Day of the Week")
+plt.ylabel("Total Distance (miles)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "cumulative_distance_by_day_of_week.png"), dpi=dpi_value
+)
+plt.close()
+
+
+# Plot: Distribution of Top Speeds
+plt.figure(figsize=(12, 6))
+plt.hist(df["topSpeedOw"], bins=30, color=colors[1], edgecolor=colors[0], alpha=0.7)
+plt.title("Distribution of Top Speeds")
+plt.xlabel("Speed (mph)")
+plt.ylabel("Frequency")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(os.path.join(output_dir, "distribution_of_top_speeds.png"), dpi=dpi_value)
+plt.close()
+
+# Plot: Top Speed Over Time
+plt.figure(figsize=(12, 6))
+plt.scatter(
     df_sorted_by_date["timestamp"], df_sorted_by_date["topSpeedOw"], color=colors[3]
 )
-axes[2, 1].set_title("Top Speed Over Time")
-axes[2, 1].set_xlabel("Date")
-axes[2, 1].set_ylabel("Top Speed (mph)")
-axes[2, 1].grid(True, alpha=0.2)
+plt.title("Top Speed Over Time")
+plt.xlabel("Date")
+plt.ylabel("Top Speed (mph)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(os.path.join(output_dir, "top_speed_over_time.png"), dpi=dpi_value)
+plt.close()
 
-# Plot 2,2: Heatmap of Top Speed by Day of Week and Hour
+# Plot: Heatmap of Top Speed by Day of Week and Hour
+plt.figure(figsize=(12, 6))
 sns.heatmap(
     top_speed_heatmap_data,
-    cmap=colors,
+    cmap="viridis",
     linewidths=0.5,
     annot=True,
     fmt="d",
-    ax=axes[2, 2],
 )
-axes[2, 2].set_title("Top Speed by Day of Week and Hour")
+plt.title("Top Speed by Day of Week and Hour")
+plt.xlabel("Hour")
+plt.ylabel("Day of Week")
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "top_speed_by_day_of_week_and_hour.png"), dpi=dpi_value
+)
+plt.close()
 
-##############################################################################################################
-
-# Plot 3,0: Distribution of Average Speeds
+# Plot: Distribution of Average Speeds
+plt.figure(figsize=(12, 6))
 sns.histplot(
     df["averageSpeed"],
     bins=30,
     kde=True,
     color=colors[2],
     edgecolor=colors[0],
-    ax=axes[3, 0],
 )
-axes[3, 0].set_title("Distribution of Average Speeds")
-axes[3, 0].set_xlabel("Average Speed (mph)")
-axes[3, 0].set_ylabel("Frequency")
-axes[3, 0].grid(True, alpha=0.2)
+plt.title("Distribution of Average Speeds")
+plt.xlabel("Average Speed (mph)")
+plt.ylabel("Frequency")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "distribution_of_average_speeds.png"), dpi=dpi_value
+)
+plt.close()
 
-# Plot 3,1: Average Speed Over Time with Gaps
-axes[3, 1].scatter(
+# Plot: Average Speed Over Time
+plt.figure(figsize=(12, 6))
+plt.scatter(
     df_sorted_by_date["timestamp"], df_sorted_by_date["averageSpeed"], color=colors[3]
 )
-axes[3, 1].set_title("Average Speed Over Time")
-axes[3, 1].set_xlabel("Date")
-axes[3, 1].set_ylabel("Average Speed (mph)")
-axes[3, 1].grid(True, alpha=0.2)
+plt.title("Average Speed Over Time")
+plt.xlabel("Date")
+plt.ylabel("Average Speed (mph)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(os.path.join(output_dir, "average_speed_over_time.png"), dpi=dpi_value)
+plt.close()
 
-# Plot 3,2: Heatmap of Average Speed by Day of Week and Hour
+# Plot: Heatmap of Average Speed by Day of Week and Hour
+plt.figure(figsize=(12, 6))
 sns.heatmap(
     average_speed_heatmap_data,
-    cmap=colors,
+    cmap="viridis",
     linewidths=0.5,
     annot=True,
     fmt="d",
-    ax=axes[3, 2],
 )
-axes[3, 2].set_title("Average Speed by Day of Week and Hour")
+plt.title("Average Speed by Day of Week and Hour")
+plt.xlabel("Hour")
+plt.ylabel("Day of Week")
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "average_speed_by_day_of_week_and_hour.png"), dpi=dpi_value
+)
+plt.close()
 
-##############################################################################################################
-
-# Plot 4,0: Distribution of Duration Between Rides
+# Plot: Distribution of Duration Between Rides
+plt.figure(figsize=(12, 6))
 sns.histplot(
     df_sorted_by_date["duration_between_rides"],
     bins=30,
     kde=True,
     color=colors[7],
     edgecolor="white",
-    ax=axes[4, 0],
 )
-axes[4, 0].set_title("Duration Between Rides")
-axes[4, 0].set_xlabel("Duration (days)")
-axes[4, 0].set_ylabel("Frequency")
-axes[4, 0].grid(True, alpha=0.2)
-
-# Plot 4,1: Daily Frequency
-axes[4, 1].scatter(rides_per_day_reindexed.index, rides_per_day_reindexed.values)
-axes[4, 1].set_title("Number of Rides per Day")
-axes[4, 1].set_xlabel("Date")
-axes[4, 1].set_ylabel("Number of Rides")
-axes[4, 1].grid(True)
-
-# Plot 4,2: Heatmap of Rides by Day of Week and Hour
-sns.heatmap(
-    heatmap_data, cmap=colors, linewidths=0.5, annot=True, fmt=".0f", ax=axes[4, 2]
-)
-axes[4, 2].set_title("Ride Frequency by Day of Week and Hour")
-
-# Grid, Title, XLabel, YLabel Adjustments
-for i in range(4):
-    for j in range(3):
-        ax = axes[i, j]
-        ax.grid(True, alpha=0.2)
-        ax.set_title(
-            ax.get_title().replace("_", " ").title(), color="white"
-        )  # replacing underscores and title casing
-        ax.set_xlabel(
-            ax.get_xlabel().replace("_", " ").title(), color="white"
-        )  # replacing underscores and title casing
-        ax.set_ylabel(
-            ax.get_ylabel().replace("_", " ").title(), color="white"
-        )  # replacing underscores and title casing
-        ax.tick_params(colors="white")
-
-# Adjust the layout
+plt.title("Duration Between Rides")
+plt.xlabel("Duration (days)")
+plt.ylabel("Frequency")
+plt.grid(True, alpha=0.2)
 plt.tight_layout()
-plt.savefig("dashboard.png", dpi=dpi_value)
-plt.show()
+plt.savefig(os.path.join(output_dir, "duration_between_rides.png"), dpi=dpi_value)
+plt.close()
+
+# Convert the rides_per_day_reindexed index to datetime if not already
+rides_per_day_reindexed.index = pd.to_datetime(rides_per_day_reindexed.index)
+
+# Ensure rides_per_day_reindexed values are integers
+rides_per_day_reindexed = rides_per_day_reindexed.astype(int)
+
+calmap.calendarplot(
+    rides_per_day_reindexed,
+    cmap="viridis",
+    fillcolor="white",
+    linewidth=0.5,
+    yearlabels=True,
+    daylabels=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    dayticks=[0, 1, 2, 3, 4, 5, 6],
+    monthticks=range(1, 13),
+    monthly_border=True,
+)
+
+plt.title("Calendar Heatmap of Ride Frequency")
+plt.savefig(os.path.join(output_dir, "calendar_heatmap_ride_frequency.png"), dpi=281)
+plt.close()
+# Box Plot for Ride Frequency by Hour
+# Calculate the number of rides for each hour
+rides_per_hour = df.groupby("hour").size()
+
+# Speed Distribution Comparison by Ride Type
+plt.figure(figsize=(12, 6))
+sns.violinplot(
+    data=df,
+    x="ow_type",
+    y="averageSpeed",
+    hue="ow_type",
+    palette="viridis",
+    dodge=False,
+    legend=False,
+)
+plt.title("Speed Distribution Comparison by Ride Type")
+plt.xlabel("Ride Type")
+plt.ylabel("Average Speed (mph)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "speed_distribution_comparison_by_ride_type.png"),
+    dpi=dpi_value,
+)
+plt.close()
+
+# Top Speed Distribution Comparison by Ride Type
+plt.figure(figsize=(12, 6))
+sns.violinplot(
+    data=df,
+    x="ow_type",
+    y="topSpeedOw",
+    hue="ow_type",
+    palette="viridis",
+    dodge=False,
+    legend=False,
+)
+plt.title("Top Speed Distribution Comparison by Ride Type")
+plt.xlabel("Ride Type")
+plt.ylabel("Top Speed (mph)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "top_speed_distribution_comparison_by_ride_type.png"),
+    dpi=dpi_value,
+)
+plt.close()
+
+# Riding Time Variability by Hour of the Day with white whiskers
+plt.figure(figsize=(12, 6))
+ax = sns.boxplot(
+    data=df,
+    x="day_of_week",
+    y="ridingTimeMinutes",
+    color=colors[4],
+    order=ordered_days,
+    dodge=False,
+)
+# Customize the whiskers to be white
+for whisker in ax.artists:
+    whisker.set_edgecolor("white")  # This sets the color of the box edges to white
+
+# We need to loop over the Line2D objects in the plot to set their color to white
+for line in ax.lines:
+    line.set_color("white")  # This sets the color of the whiskers and caps to white
+
+plt.title("Riding Time Variability by Day of Week")
+plt.xlabel("Day of Week")
+plt.ylabel("Riding Time (minutes)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "riding_time_variability_by_day_of_week.png"),
+    dpi=dpi_value,
+)
+plt.close()
+
+# Riding Time Variability by Hour of the Day with white whiskers
+plt.figure(figsize=(12, 6))
+ax = sns.boxplot(data=df, x="hour", y="ridingTimeMinutes", color=colors[4], dodge=False)
+
+# Customize the whiskers to be white
+for whisker in ax.artists:
+    whisker.set_edgecolor("white")  # This sets the color of the box edges to white
+
+# We need to loop over the Line2D objects in the plot to set their color to white
+for line in ax.lines:
+    line.set_color("white")  # This sets the color of the whiskers and caps to white
+
+plt.title("Riding Time Variability by Hour of the Day")
+plt.xlabel("Hour of the Day")
+plt.ylabel("Riding Time (minutes)")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.xticks(range(0, 24))  # Show all hours on the x-axis
+plt.savefig(
+    os.path.join(output_dir, "riding_time_variability_by_hour.png"), dpi=dpi_value
+)
+plt.close()
+
+
+# Histogram of Riding Time Distribution
+plt.figure(figsize=(12, 6))
+sns.histplot(df["ridingTimeMinutes"], bins=30, kde=True, color=colors[4])
+plt.title("Histogram of Riding Time Distribution")
+plt.xlabel("Riding Time (minutes)")
+plt.ylabel("Frequency")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.savefig(
+    os.path.join(output_dir, "histogram_of_riding_time_distribution.png"), dpi=dpi_value
+)
+plt.close()
