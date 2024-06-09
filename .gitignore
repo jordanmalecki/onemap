@@ -87,3 +87,6 @@ config.py
 rides_map_dark.html
 dashboard.png
 out/
+
+# Ignore the dynamically generated configuration file
+config.json

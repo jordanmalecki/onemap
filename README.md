@@ -11,7 +11,6 @@ This project is designed to aggregate and visualize a user's OneWheel app rides 
 The program starts by retrieving general ride details from the endpoint:
 https://app.onewheel.com/wp-json/fm/v2/trails
 
-
 ### 2. **User Input**:
 
 **Initial Run**:
@@ -39,12 +38,10 @@ Before diving into the augmentation process, it's important to note that the tra
 For each filtered ride with an ID greater than the highest existing ID in `user_rides.json`:
 
 - Details are fetched from:
-https://app.onewheel.com/wp-json/fm/v2/trails/1?trackId={ride_id}
-
+  https://app.onewheel.com/wp-json/fm/v2/trails/1?trackId={ride_id}
 
 - If the ride matches the user's nickname, further detailed coordinates for the ride are fetched from:
-https://app.onewheel.com/wp-json/fm/v2/trailscoordinates/{ride_id}
-
+  https://app.onewheel.com/wp-json/fm/v2/trailscoordinates/{ride_id}
 
 This data is saved locally for further processing.
 
@@ -63,7 +60,7 @@ To view and explore the aggregated map:
 
 ### 6. **Stats**:
 
-Ride stats are visulized using the combined `plot_stats.py` and `one_stat.py` functionalities integrated into the main process.
+Ride stats are visualized using the combined `plot_stats.py` and `one_stat.py` functionalities integrated into the main process.
 
 When you run the main script (`run.py`), it will:
 - Generate individual statistical plot images in the `out` directory.
@@ -76,15 +73,16 @@ Example stats:
 ## Prerequisites
 
 - Python 3.x
-- Required Python packages: `requests`, `folium`, `geopy`, `matplotlib`, `seaborn`, `pandas`, `Pillow`, `calmap`
+- Required Python packages: `requests`, `folium`, `geopy`, `matplotlib`, `seaborn`, `pandas`, `Pillow`, `calmap`, `setuptools`
 
 ## Setup
 
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/whoalacoasta/onemap
+   git clone https://github.com/jordanmalecki/onemap.git
    ```
+
 2. **Set up a virtual environment**:
 
    Navigate to the project directory and create a virtual environment:
@@ -103,20 +101,53 @@ Example stats:
      ```bash
      source .venv/bin/activate
      ```
+
 3. **Install required packages**:
 
    ```bash
    pip install -r requirements.txt
    ```
 
+   **Note on Missing Modules:** 
+   
+   - Ensure `calmap` and `setuptools` are included in `requirements.txt` to avoid missing module errors:
+     ```plaintext
+     calmap==0.0.9
+     setuptools==67.1.0
+     ```
+
 ## Configuration:
 
-1. **Rename `config_example.py` to `config.py`**:
+1. **Initial Configuration**:
+
+   The `config.json` file, which stores configuration details, is not included in the repository and will be automatically generated on the first run of the application.
+
+   - If `config.json` contains placeholder values or does not exist, you will be prompted to enter the following details:
+     - **Location**: Your location (e.g., 'Buffalo, NY')
+     - **Maximum Distance**: The maximum distance in miles you'd like to search for rides.
+     - **Nickname**: Your OneWheel app nickname (display name on leaderboards).
+
+     These inputs will be saved to `config.json` for future runs, eliminating the need for repeated input. 
+
+   - You can also manually create and set up `config.json` with the following structure:
+
+     ```json
+     {
+         "ONEMAP_LOCATION": "Your_Location_Here",
+         "ONEMAP_MAX_DISTANCE": 10.0,
+         "ONEMAP_NICKNAME": "Your_Nickname_Here"
+     }
+     ```
+
+     Replace `"Your_Location_Here"`, `10.0`, and `"Your_Nickname_Here"` with your actual location, preferred distance in miles, and OneWheel nickname respectively.
+
+2. **Rename `config_example.py` to `config.py`**:
 
    ```bash
    mv config_example.py config.py
    ```
-2. **Update `config.py` with the necessary headers and cookies**:
+
+3. **Update `config.py` with the necessary headers and cookies**:
 
    These can be obtained by inspecting the network requests made while browsing public rides.
 
@@ -127,16 +158,6 @@ Example stats:
    - Filter the requests to locate the specific endpoints used in this project, such as `https://app.onewheel.com/wp-json/fm/v2/trails` and related endpoints (e.g., filtering by "v2" would work).
    - Once you identify a relevant request, click on it and copy the 'Request Headers' and 'Cookies' to use in the `config.py` file.
 
-3. **Initial User Input**:
-
-   On the first run, if `ONEMAP_LOCATION`, `ONEMAP_MAX_DISTANCE`, or `ONEMAP_NICKNAME` are not set in `config.json`, the program will prompt for these inputs:
-
-   - **Location**: E.g., 'Buffalo, NY'
-   - **Maximum Distance**: In miles
-   - **Nickname**: Your OneWheel app nickname
-
-   These inputs will be saved to `config.json` for future runs, eliminating the need for repeated input. Subsequent runs will use the saved values.
-
 ## Usage
 
 Navigate to the project directory (ensure your virtual environment is activated) and execute:
@@ -146,6 +167,24 @@ python run.py
 ```
 
 This command will fetch, filter, augment, and visualize your OneWheel ride data, and generate both an interactive map and a comprehensive statistical dashboard in the `out` directory.
+
+### Detailed Functionality
+
+1. **Fetching Trail Data**: The application connects to the OneWheel app's API to retrieve trail data and saves it to `data/trails.json`.
+   
+2. **Filtering Rides**: It filters the fetched trail data to identify rides within the specified distance from your location, using a Haversine distance calculation. The results are saved to `data/filtered_rides.json`.
+
+3. **Augmenting Ride Data**: The filtered rides are then augmented with detailed coordinates and additional ride information, if available. This augmented data is stored in `data/user_rides.json` and `data/coordinates.json`.
+
+4. **Visualizing Data**: The application generates several visualizations:
+   - **Ride Maps**: Visual representations of rides plotted on a map.
+   - **Statistics**: Various statistical charts and graphs related to the rides.
+
+### Notes
+
+- **Configuration File Management**: The `config.json` file is dynamically created and should not be tracked by Git. Ensure it is listed in `.gitignore` to prevent it from being included in commits.
+- **Module Errors**: Ensure `calmap` and `setuptools` are included in `requirements.txt` to avoid missing module errors.
+- **Repository Update**: Use the latest repository link provided above, as the old one is outdated.
 
 ## Contributing
 
