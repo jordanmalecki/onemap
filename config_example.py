@@ -1,9 +1,7 @@
 import json
 import os
 
-# Example configuration with placeholders
 CONFIG_PATH = "config.json"
-
 example_config = {
     "HEADERS": {
         "authority": "app.onewheel.com",
@@ -28,8 +26,6 @@ example_config = {
     "ONEMAP_NICKNAME": "Your_Nickname_Here",
 }
 
-
-# Load configuration
 def load_config():
     if os.path.exists(CONFIG_PATH):
         with open(CONFIG_PATH, "r") as f:
@@ -39,47 +35,40 @@ def load_config():
         save_config(config)
     return config
 
-
-# Save configuration
 def save_config(config):
     with open(CONFIG_PATH, "w") as f:
         json.dump(config, f, indent=4)
 
-
-# Update configuration if missing
 def update_config_if_missing():
     config = load_config()
     updated = False
-
-    if not config["ONEMAP_LOCATION"]:
+    
+    if "Your_Location_Here" in config["ONEMAP_LOCATION"]:
         config["ONEMAP_LOCATION"] = input(
             "Please enter your location (e.g., 'Buffalo, NY'): "
         )
         updated = True
-
-    if not config["ONEMAP_MAX_DISTANCE"]:
+    
+    if config["ONEMAP_MAX_DISTANCE"] == 10.0:
         config["ONEMAP_MAX_DISTANCE"] = float(
             input(
                 "Please enter the maximum distance in miles you'd like to search for rides: "
             )
         )
         updated = True
-
-    if not config["ONEMAP_NICKNAME"]:
+    
+    if "Your_Nickname_Here" in config["ONEMAP_NICKNAME"]:
         config["ONEMAP_NICKNAME"] = input(
             "Please enter your OneWheel app Nickname (display name on leaderboards): "
         )
         updated = True
-
+    
     if updated:
         save_config(config)
-
     return config
 
-
-# Example function call
 if __name__ == "__main__":
     config = update_config_if_missing()
     print(
-        "Example configuration has been set up. Please replace placeholders with actual values."
+        "Configuration has been updated. Please ensure the values are correct."
     )
