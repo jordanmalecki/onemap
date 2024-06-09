@@ -39,7 +39,6 @@ For each filtered ride with an ID greater than the highest existing ID in `user_
 
 - Details are fetched from:
   https://app.onewheel.com/wp-json/fm/v2/trails/1?trackId={ride_id}
-
 - If the ride matches the user's nickname, further detailed coordinates for the ride are fetched from:
   https://app.onewheel.com/wp-json/fm/v2/trailscoordinates/{ride_id}
 
@@ -63,6 +62,7 @@ To view and explore the aggregated map:
 Ride stats are visualized using the combined `plot_stats.py` and `one_stat.py` functionalities integrated into the main process.
 
 When you run the main script (`run.py`), it will:
+
 - Generate individual statistical plot images in the `out` directory.
 - Combine these individual plots into a single comprehensive `combined_plots.png` file in the `out` directory.
 
@@ -82,7 +82,6 @@ Example stats:
    ```bash
    git clone https://github.com/jordanmalecki/onemap.git
    ```
-
 2. **Set up a virtual environment**:
 
    Navigate to the project directory and create a virtual environment:
@@ -101,15 +100,14 @@ Example stats:
      ```bash
      source .venv/bin/activate
      ```
-
 3. **Install required packages**:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-   **Note on Missing Modules:** 
-   
+   **Note on Missing Modules:**
+
    - Ensure `calmap` and `setuptools` are included in `requirements.txt` to avoid missing module errors:
      ```plaintext
      calmap==0.0.9
@@ -123,12 +121,12 @@ Example stats:
    The `config.json` file, which stores configuration details, is not included in the repository and will be automatically generated on the first run of the application.
 
    - If `config.json` contains placeholder values or does not exist, you will be prompted to enter the following details:
+
      - **Location**: Your location (e.g., 'Buffalo, NY')
      - **Maximum Distance**: The maximum distance in miles you'd like to search for rides.
      - **Nickname**: Your OneWheel app nickname (display name on leaderboards).
 
-     These inputs will be saved to `config.json` for future runs, eliminating the need for repeated input. 
-
+     These inputs will be saved to `config.json` for future runs, eliminating the need for repeated input.
    - You can also manually create and set up `config.json` with the following structure:
 
      ```json
@@ -140,13 +138,11 @@ Example stats:
      ```
 
      Replace `"Your_Location_Here"`, `10.0`, and `"Your_Nickname_Here"` with your actual location, preferred distance in miles, and OneWheel nickname respectively.
-
 2. **Rename `config_example.py` to `config.py`**:
 
    ```bash
    mv config_example.py config.py
    ```
-
 3. **Update `config.py` with the necessary headers and cookies**:
 
    These can be obtained by inspecting the network requests made while browsing public rides.
@@ -171,24 +167,17 @@ This command will fetch, filter, augment, and visualize your OneWheel ride data,
 ### Detailed Functionality
 
 1. **Fetching Trail Data**: The application connects to the OneWheel app's API to retrieve trail data and saves it to `data/trails.json`.
-   
 2. **Filtering Rides**: It filters the fetched trail data to identify rides within the specified distance from your location, using a Haversine distance calculation. The results are saved to `data/filtered_rides.json`.
-
 3. **Augmenting Ride Data**: The filtered rides are then augmented with detailed coordinates and additional ride information, if available. This augmented data is stored in `data/user_rides.json` and `data/coordinates.json`.
-
 4. **Visualizing Data**: The application generates several visualizations:
+
    - **Ride Maps**: Visual representations of rides plotted on a map.
    - **Statistics**: Various statistical charts and graphs related to the rides.
-
-### Notes
-
-- **Configuration File Management**: The `config.json` file is dynamically created and should not be tracked by Git. Ensure it is listed in `.gitignore` to prevent it from being included in commits.
-- **Module Errors**: Ensure `calmap` and `setuptools` are included in `requirements.txt` to avoid missing module errors.
-- **Repository Update**: Use the latest repository link provided above, as the old one is outdated.
 
 ## Contributing
 
 Pull requests are welcome. For significant changes, please open an issue first to discuss.
 
 ## License
+
 [MIT](https://choosealicense.com/licenses/mit/)
