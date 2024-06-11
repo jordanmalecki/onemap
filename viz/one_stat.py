@@ -6,7 +6,7 @@ def combine_plots(output_dir):# Create output directory if it doesn't exist
 
     # Define the order of the plots
     plot_files = [
-        "calendar_heatmap_ride_frequency.png",
+        "calendar_heatmap_total_distance.png",
         "number_of_rides_by_day_of_week.png",
         "number_of_rides_by_hour_of_the_day.png",
         "histogram_of_riding_time_distribution.png",

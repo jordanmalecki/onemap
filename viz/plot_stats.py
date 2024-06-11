@@ -441,15 +441,28 @@ def plot_statistics(input_path, output_dir):
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, "duration_between_rides.png"), dpi=dpi_value)
     plt.close()
+    
+    # Replace ride frequency calculation with total distance calculation per day
+    miles_per_day = df.groupby(df["timestamp"].dt.date)["distance"].sum()
 
-    # Convert the rides_per_day_reindexed index to datetime if not already
-    rides_per_day_reindexed.index = pd.to_datetime(rides_per_day_reindexed.index)
+    # Create a date range from the minimum to the maximum date in the dataset
+    all_dates = pd.date_range(
+        start=df["timestamp"].min().date(), end=datetime.today().date()
+    )
 
-    # Ensure rides_per_day_reindexed values are integers
-    rides_per_day_reindexed = rides_per_day_reindexed.astype(int)
+    # Reindex the miles_per_day series to include all dates and fill missing values with 0
+    miles_per_day_reindexed = miles_per_day.reindex(all_dates, fill_value=0)
 
+    # Convert the index to datetime format to ensure compatibility with calmap
+    miles_per_day_reindexed.index = pd.to_datetime(miles_per_day_reindexed.index)
+
+    # Ensure the values are in float to accommodate distance values
+    miles_per_day_reindexed = miles_per_day_reindexed.astype(float)
+
+    # Replace the calendar plot for ride frequency with the total distance heatmap
+    plt.figure(figsize=(20, 10))
     calmap.calendarplot(
-        rides_per_day_reindexed,
+        miles_per_day_reindexed,
         cmap="viridis",
         fillcolor="white",
         linewidth=0.5,
@@ -460,14 +473,11 @@ def plot_statistics(input_path, output_dir):
         monthly_border=True,
     )
 
-    plt.title("Calendar Heatmap of Ride Frequency")
+    plt.title("Total Daily Distance Calendar Heatmap")
     plt.savefig(
-        os.path.join(output_dir, "calendar_heatmap_ride_frequency.png"), dpi=281
+        os.path.join(output_dir, "calendar_heatmap_total_distance.png"), dpi=281
     )
     plt.close()
-    # Box Plot for Ride Frequency by Hour
-    # Calculate the number of rides for each hour
-    rides_per_hour = df.groupby("hour").size()
 
     # Speed Distribution Comparison by Ride Type
     plt.figure(figsize=(12, 6))
